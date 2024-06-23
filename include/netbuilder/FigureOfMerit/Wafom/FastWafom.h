@@ -21,6 +21,11 @@
  * This class computes the Walsh Figure of Merit (WAFOM) for a Digital Net in
  * Base 2 using a lookup table to accelerate the computation.
  *
+ * The WAFOM is a measure used in numerical integration to assess the 
+ * quality of digital nets. It evaluates the uniformity of point distributions in a digital net by 
+ * using Walsh functions. Lower WAFOM values indicate better uniformity and, consequently, better 
+ * performance for numerical integration tasks.
+ *
  * For Matsumoto's definition
  *
  * WAFOM(P) = -1 + \frac{1}{|P|} \left( \sum_{\mathbf{x}_i \in P}
