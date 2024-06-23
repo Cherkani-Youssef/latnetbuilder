@@ -12,7 +12,7 @@
 
 namespace NetBuilder
 {
-
+// Class that handles generating points of digital nets
     class GetColsReverseCache
     {
 
