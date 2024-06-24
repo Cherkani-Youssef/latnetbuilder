@@ -197,7 +197,26 @@ class GeneratingMatrix {
             }
             return GeneratingMatrix(nRows, nCols, res);
         };
+        typedef boost::dynamic_bitset<> Col;
+        template <typename RAND>
+        static GeneratingMatrix createColumnMatrix(unsigned int nRows, unsigned int onePosition, RAND &randomGen)
+        {
+    
+            LatBuilder::UniformUIntDistribution<unsigned long, LatBuilder::LFSR258> m_unif(0,  (1 << (nRows)) - 1);
+            GeneratingMatrix::uInteger val = m_unif(randomGen);
 
+            Col column = boost::dynamic_bitset<>(nRows, val);
+
+            // Create a GeneratingMatrix with a single column and nRows rows
+            GeneratingMatrix mat(nRows, 1);
+            for (unsigned int i = 0; i < nRows; ++i)
+            {
+                // Set the bit in the matrix according to the bitset
+                mat(i, 0) = column[i];
+            }
+
+            return mat;
+        }
     private:
         std::vector<boost::dynamic_bitset<>> m_data; // data internal representantion
         unsigned int m_nRows; // number of rows of the matrix
