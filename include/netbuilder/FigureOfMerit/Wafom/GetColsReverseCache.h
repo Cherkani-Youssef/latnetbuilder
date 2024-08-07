@@ -3,8 +3,8 @@
 
 #include <unordered_map>
 #include <vector>
-#include <stdexcept> 
-#include <cmath>    
+#include <stdexcept>
+#include <cmath>
 #include <boost/dynamic_bitset.hpp>
 #include "netbuilder/Types.h"
 #include "netbuilder/DigitalNet.h"
@@ -12,32 +12,28 @@
 
 namespace NetBuilder
 {
-// Class that handles generating points of digital nets
+
     class GetColsReverseCache
     {
 
     public:
-        GetColsReverseCache(const AbstractDigitalNet &net) : m_net(net) {}
-
-        const std::vector<uInteger> &get(int dimension)
+        GetColsReverseCache(const AbstractDigitalNet &net) : m_net(net)
         {
-            auto it = cache.find(dimension);
-            if (it != cache.end())
+            int dim = net.dimension();
+            columns.resize(dim); // Resize the columns vector
+            for (int i = 0; i < dim; i++)
             {
-                return it->second;
+                auto matrix = m_net.generatingMatrix(i);
+                columns[i] = matrix.getColsReverse();
             }
-
-            const auto &matrix = m_net.generatingMatrix(dimension);
-            std::vector<uInteger> colsReverse = computeGetColsReverse(matrix);
-            cache[dimension] = std::move(colsReverse);
-            return cache[dimension];
         }
+
+
 
         /***
          * @param i: index of the point in the pointset
          * @param dim: dimension of the pointset
          * @param cachedCurPoint array to store the point
-         *
          */
         void getPoint(const int &i, const int &dim, uint64_t cachedCurPoint[])
         {
@@ -45,10 +41,11 @@ namespace NetBuilder
             for (int j = 0; j < dim; j++)
             {
                 uint64_t res = 0;
-                const std::vector<uInteger> &getColsReverse = get(j);
+                // const std::vector<uInteger> &getColsReverse = get(j);
 
-                for (size_t c = 0; c < getColsReverse.size(); c++)
-                    res ^= ((i >> c) & 1) * getColsReverse[c];
+                for (size_t c = 0; c <  columns[j].size(); c++)
+                    res ^= ((i >> c) & 1) * columns[j][c];
+                // res ^= ((i >> c) & 1) * getColsReverse[c];
 
                 cachedCurPoint[j] = res;
             }
@@ -63,19 +60,21 @@ namespace NetBuilder
         void getPointForProj(const int &i, const LatticeTester::Coordinates &projection, uint64_t cachedCurPoint[])
         {
             uint64_t res;
-            int j = -1;
+            int j = 0;
             // Iterate over each dimension
             for (auto dim : projection)
             {
 
                 res = 0;
-                const std::vector<uInteger> &getColsReverse = get(dim);
+                // const std::vector<uInteger> &getColsReverse = get(dim);
 
-                for (size_t c = 0; c < getColsReverse.size(); c++)
+                for (size_t c = 0; c < columns[j].size(); c++)
                 {
-                    res ^= ((i >> c) & 1) * getColsReverse[c];
+                    // res ^= ((i >> c) & 1) * getColsReverse[c];
+                     res ^= ((i >> c) & 1) * columns[dim][c];
                 }
-                cachedCurPoint[j++] = res;
+                cachedCurPoint[j] = res;
+                j++;
             }
         }
 
@@ -114,9 +113,11 @@ namespace NetBuilder
         std::unordered_map<int, std::vector<uInteger>> cache;
         const AbstractDigitalNet &m_net;
 
+        std::vector<std::vector<uInteger>> columns;
+
         /**
          * @param GeneratingMatrix matrix
-         * @return  std::vector<uInteger> element tis the integer representations of the a column of a matrix
+         * @return  std::vector<uInteger>  the integer representations of the a column of a matrix
          */
         std::vector<uInteger> computeGetColsReverse(const GeneratingMatrix &matrix) const
         {
